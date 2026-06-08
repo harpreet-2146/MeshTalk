@@ -1,0 +1,247 @@
+/* ================================================================
+   NETWORK / HOW IT WORKS PAGE
+   ================================================================ */
+
+.nw-page {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 32px 36px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  background: var(--bg-secondary);
+}
+
+/* ── Header ────────────────────────────────────────────────────── */
+.nw-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.nw-header-eyebrow {
+  font-size: 9px;
+  font-family: var(--mono);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.nw-header-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.nw-header-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+  max-width: 540px;
+}
+
+/* ── Section labels ────────────────────────────────────────────── */
+.nw-section-label {
+  font-size: 9px;
+  font-family: var(--mono);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.nw-section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Two-column layout ─────────────────────────────────────────── */
+.nw-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 720px) {
+  .nw-two-col { grid-template-columns: 1fr; }
+}
+
+/* ── Topology ──────────────────────────────────────────────────── */
+.nw-topology-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nw-topology-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.nw-topology-hint {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--text-muted);
+  text-align: center;
+  opacity: 0.55;
+}
+
+/* ── Protocol stack ────────────────────────────────────────────── */
+.nw-stack {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.nw-stack-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+.nw-stack-row:last-child { border-bottom: none; }
+.nw-stack-row:hover { background: var(--surface-2); }
+
+.nw-stack-bar {
+  width: 3px;
+  height: 22px;
+  border-radius: 2px;
+  background: var(--lc, #3ddc84);
+  flex-shrink: 0;
+}
+
+.nw-stack-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 160px;
+}
+
+.nw-stack-sub {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text-muted);
+}
+
+/* ── Concept cards ─────────────────────────────────────────────── */
+.nw-concepts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.nw-concept-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color var(--transition);
+}
+.nw-concept-card:hover {
+  border-color: var(--border-light);
+}
+
+.nw-concept-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.nw-concept-icon {
+  color: var(--accent);
+  opacity: 0.8;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.nw-concept-tag {
+  font-size: 8px;
+  font-family: var(--mono);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  opacity: 0.65;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.nw-concept-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.nw-concept-body {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.nw-concept-proto {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--text-muted);
+  opacity: 0.6;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 2px;
+}
+
+/* ── Message lifecycle flow ────────────────────────────────────── */
+.nw-flow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+}
+
+.nw-flow-step {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text-secondary);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+.nw-flow-step:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.nw-flow-arrow {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.4;
+  font-family: var(--mono);
+}
