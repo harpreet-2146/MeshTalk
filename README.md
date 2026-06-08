@@ -52,6 +52,15 @@ MeshTalk is a Tauri v2 app, so you need system dependencies, Rust, and Node.js.
 Follow the official Tauri prerequisites for your OS. These are required even if you already have Rust and Node installed.  
 Docs: `https://v2.tauri.app/start/prerequisites/`
 
+**Windows**
+On Windows you must install Visual Studio Build Tools with the "Desktop development with C++" workload and a Windows 10/11 SDK. A missing `ucrt.lib` error means the MSVC Universal CRT libraries are not available to the linker.
+
+Use a Developer Command Prompt / Developer PowerShell so Visual Studio environment variables are configured. You can also run:
+```bash
+pnpm run check-windows-build
+```
+If that script reports missing `cl.exe` or `ucrt.lib`, install the required C++ build tools and Windows SDK.
+
 **Linux (Debian/Ubuntu)**
 ```bash
 sudo apt update
@@ -211,7 +220,8 @@ The SQLite DB is stored as `meshtalk.db` in that folder.
 ---
 
 **Troubleshooting**
-- If `tauri dev` fails with build errors on Windows, verify C++ build tools and WebView2 are installed.
+- If `tauri dev` fails with build errors on Windows, verify Visual Studio Build Tools is installed with the "Desktop development with C++" workload and a Windows SDK.
+- If you see `LINK : fatal error LNK1104: cannot open file 'ucrt.lib'`, install the Windows SDK or run from a Developer Command Prompt so the MSVC library paths are configured.
 - If Linux builds fail, confirm all WebKit2GTK and appindicator packages are installed.
 - If Rust commands fail, restart your terminal to refresh `PATH`.
 
