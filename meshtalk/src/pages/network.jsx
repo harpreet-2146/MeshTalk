@@ -93,7 +93,7 @@ const CONCEPTS = [
 ];
 
 const STACK = [
-    { label: 'MeshTalk UI',       sub: 'React + Tauri webview',        color: '#3ddc84' },
+    { label: 'MeshTalk UI',       sub: 'React + Tauri webview',        color: '#7d9a72' },
     { label: 'App Protocol',      sub: 'JSON messages · custom framing', color: '#60a5fa' },
     { label: 'WebRTC / Sockets',  sub: 'RTCPeerConnection · TCP stream', color: '#a78bfa' },
     { label: 'ICE / STUN',        sub: 'NAT traversal · candidate pairs', color: '#f59e0b' },
@@ -117,8 +117,8 @@ function TopologyMap() {
             <svg viewBox={`0 0 ${W} ${H}`} className="nw-topology-svg" role="img" aria-label="Mesh network topology">
                 <defs>
                     <radialGradient id="ng" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="#3ddc84" stopOpacity="0.18"/>
-                        <stop offset="100%" stopColor="#3ddc84" stopOpacity="0"/>
+                        <stop offset="0%" stopColor="#7d9a72" stopOpacity="0.18"/>
+                        <stop offset="100%" stopColor="#7d9a72" stopOpacity="0"/>
                     </radialGradient>
                 </defs>
 
@@ -131,7 +131,7 @@ function TopologyMap() {
                             key={`${aid}-${bid}`}
                             x1={px(a.x)} y1={py(a.y)}
                             x2={px(b.x)} y2={py(b.y)}
-                            stroke={isActive ? '#3ddc84' : '#1e1e2e'}
+                            stroke={isActive ? '#7d9a72' : '#1f2219'}
                             strokeWidth={isActive ? 1.5 : 1}
                             strokeDasharray={isActive ? 'none' : '4 3'}
                             opacity={isActive ? 0.9 : 0.5}
@@ -153,8 +153,8 @@ function TopologyMap() {
                             {isYou && <circle r="22" fill="url(#ng)" />}
                             <circle
                                 r={isYou ? 10 : 7}
-                                fill={isYou ? '#3ddc84' : (isActive ? '#3ddc84' : '#13131c')}
-                                stroke={isYou ? '#3ddc84' : (isActive ? '#3ddc84' : '#252535')}
+                                fill={isYou ? '#7d9a72' : (isActive ? '#7d9a72' : '#131510')}
+                                stroke={isYou ? '#7d9a72' : (isActive ? '#7d9a72' : '#282d20')}
                                 strokeWidth={isYou ? 0 : 1.5}
                                 style={{ transition: 'all 180ms' }}
                             />
@@ -163,7 +163,7 @@ function TopologyMap() {
                                 textAnchor="middle"
                                 fontSize={isYou ? 9 : 8}
                                 fontWeight={isYou ? 700 : 500}
-                                fill={isYou ? '#3ddc84' : (isActive ? '#e0e0e0' : '#888')}
+                                fill={isYou ? '#7d9a72' : (isActive ? '#e0e0e0' : '#888')}
                                 fontFamily="Space Mono, monospace"
                                 style={{ transition: 'fill 180ms', pointerEvents: 'none' }}>
                                 {n.label}

@@ -54,7 +54,7 @@ export default function MeshBackground({
                     const dy = dots[i].y - dots[j].y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     if (dist < md) {
-                        ctx.strokeStyle = `rgba(61,220,132,${(1 - dist / md) * la})`;
+                        ctx.strokeStyle = `rgba(125,154,114,${(1 - dist / md) * la})`;
                         ctx.lineWidth = 1;
                         ctx.beginPath();
                         ctx.moveTo(dots[i].x, dots[i].y);
@@ -67,7 +67,7 @@ export default function MeshBackground({
             dots.forEach(d => {
                 ctx.beginPath();
                 ctx.arc(d.x, d.y, dr, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(61,220,132,${da})`;
+                ctx.fillStyle = `rgba(125,154,114,${da})`;
                 ctx.fill();
             });
 

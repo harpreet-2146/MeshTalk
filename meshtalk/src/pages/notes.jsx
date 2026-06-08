@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { useNotes } from '../context/AppContext';
 import * as api from '../lib/api';
 
-const COLORS = ['#3ddc84', '#f59e0b', '#60a5fa', '#f472b6', '#a78bfa', '#fb923c'];
+const COLORS = ['#7d9a72', '#f59e0b', '#60a5fa', '#f472b6', '#a78bfa', '#fb923c'];
 
 export default function NotesPage() {
     const { notes, loading, save, remove, togglePin } = useNotes();

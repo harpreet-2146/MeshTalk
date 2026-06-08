@@ -418,7 +418,7 @@ export default function MeetingsPage() {
         id,
         title: `Meeting · ${new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`,
         content: meetingNotes.trim(),
-        color: '#3ddc84',
+        color: '#7d9a72',
         pinned: false,
         category: 'meeting',
       });
