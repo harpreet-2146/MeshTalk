@@ -9,6 +9,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import * as api from '../lib/api';
 import UserAvatar from '../components/UserAvatar';
 import MeetingRTCManager from '../lib/meeting_rtc_webrtc';
 import {
@@ -53,6 +54,8 @@ export default function MeetingsPage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
   const [isLogsOpen, setIsLogsOpen] = useState(false);
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
+  const [meetingNotes, setMeetingNotes] = useState('');
   const [isMicOn, setIsMicOn] = useState(true);
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [selectedPeersForShare, setSelectedPeersForShare] = useState([]);
@@ -123,7 +126,7 @@ export default function MeetingsPage() {
     };
 
     mgr.onChatMessage = (data) => {
-      const msg = { sender: data.sender, senderName: data.senderName, text: data.text, timestamp: data.timestamp };
+      const msg = { sender: data.sender, senderName: data.senderName, text: data.text, timestamp: data.timestamp, type: data.type };
       setChatMessages(prev => {
         if (prev.find(m => m.timestamp === msg.timestamp && m.sender === msg.sender)) return prev;
         const next = [...prev, msg];
@@ -383,6 +386,48 @@ export default function MeetingsPage() {
     setIsScreenSharing(false);
   }, []);
 
+  // ─── Share meeting notes as doc to all participants ───────
+  const handleShareNotes = useCallback(async () => {
+    if (!meetingNotes.trim()) return;
+    const msg = {
+      sender: deviceId,
+      senderName: localUser?.username || 'You',
+      text: meetingNotes.trim(),
+      timestamp: Date.now(),
+      type: 'doc',
+    };
+    setChatMessages(prev => {
+      const next = [...prev, msg];
+      saveMeetingChat(meetingIdRef.current, next);
+      return next;
+    });
+    await sendChatToAll(msg);
+    setIsNotesOpen(false);
+    setIsParticipantsOpen(false);
+    setIsLogsOpen(false);
+    setIsChatOpen(true);
+    showToast('Notes shared to meeting chat', 'success');
+  }, [meetingNotes, deviceId, localUser, sendChatToAll, showToast]);
+
+  // ─── Save meeting notes to permanent Notes pad ────────────
+  const handleSaveNotes = useCallback(async () => {
+    if (!meetingNotes.trim()) return;
+    try {
+      const id = await api.generateUuid();
+      await api.saveNote({
+        id,
+        title: `Meeting · ${new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`,
+        content: meetingNotes.trim(),
+        color: '#3ddc84',
+        pinned: false,
+        category: 'meeting',
+      });
+      showToast('Saved to Notes', 'success');
+    } catch (e) {
+      showToast('Failed to save notes', 'error');
+    }
+  }, [meetingNotes, showToast]);
+
   // ─── Create Meeting (Host) ────────────────────────────────
   const createMeeting = useCallback(async () => {
     const id = await generateMeetingId();
@@ -592,6 +637,7 @@ export default function MeetingsPage() {
     setIsChatOpen(false);
     setIsParticipantsOpen(false);
     setIsLogsOpen(false);
+    setIsNotesOpen(false);
   }, []);
 
   // ═══════════════════════════════════════════════════════════════
@@ -806,11 +852,13 @@ export default function MeetingsPage() {
           )}
         </div>
 
-        {/* Side Panel: Chat, Participants, or Logs */}
-        {(isChatOpen || isParticipantsOpen || isLogsOpen) && (
+        {/* Side Panel: Chat, Participants, Logs, or Notes */}
+        {(isChatOpen || isParticipantsOpen || isLogsOpen || isNotesOpen) && (
           <div className="mt-sidepanel">
             <div className="mt-sidepanel-header">
-              <span className="mt-sidepanel-title">{isChatOpen ? 'Meeting Chat' : isParticipantsOpen ? 'Participants' : 'Debug Logs'}</span>
+              <span className="mt-sidepanel-title">
+                {isChatOpen ? 'Meeting Chat' : isParticipantsOpen ? 'Participants' : isLogsOpen ? 'Debug Logs' : 'Meeting Notes'}
+              </span>
               <button className="icon-btn-sm" onClick={closeSidePanel}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -828,9 +876,21 @@ export default function MeetingsPage() {
                     </div>
                   )}
                   {chatMessages.map((msg, i) => (
-                    <div key={i} className={`mt-chat-msg ${msg.sender === deviceId ? 'mt-chat-msg-self' : ''}`}>
+                    <div key={i} className={`mt-chat-msg ${msg.sender === deviceId ? 'mt-chat-msg-self' : ''} ${msg.type === 'doc' ? 'mt-chat-msg-doc' : ''}`}>
                       <span className="mt-chat-sender">{msg.sender === deviceId ? 'You' : msg.senderName}</span>
-                      <span className="mt-chat-text">{msg.text}</span>
+                      {msg.type === 'doc' ? (
+                        <div className="mt-doc-card">
+                          <div className="mt-doc-card-header">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            MEETING NOTES
+                          </div>
+                          <pre className="mt-doc-card-body">{msg.text}</pre>
+                        </div>
+                      ) : (
+                        <span className="mt-chat-text">{msg.text}</span>
+                      )}
                       <span className="mt-chat-time">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                   ))}
@@ -871,6 +931,37 @@ export default function MeetingsPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {isNotesOpen && (
+              <div className="mt-notes-panel">
+                <textarea
+                  className="mt-notes-textarea"
+                  placeholder={"Take notes…\n\nPrivate until you share them."}
+                  value={meetingNotes}
+                  onChange={e => setMeetingNotes(e.target.value)}
+                  autoFocus
+                  spellCheck={false}
+                />
+                <div className="mt-notes-actions">
+                  <button
+                    className="btn-secondary btn-sm"
+                    onClick={handleSaveNotes}
+                    disabled={!meetingNotes.trim()}
+                    title="Save to your Notes pad"
+                  >
+                    Save to Pad
+                  </button>
+                  <button
+                    className="btn-primary btn-sm"
+                    onClick={handleShareNotes}
+                    disabled={!meetingNotes.trim()}
+                    title="Broadcast to all participants"
+                  >
+                    Share Doc →
+                  </button>
+                </div>
               </div>
             )}
 
@@ -961,6 +1052,18 @@ export default function MeetingsPage() {
               <line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" />
             </svg>
             <span>Invite</span>
+          </button>
+
+          <button
+            className={`mt-ctrl-btn ${isNotesOpen ? 'mt-ctrl-btn-active' : ''}`}
+            onClick={() => { const v = !isNotesOpen; closeSidePanel(); if (v) setIsNotesOpen(true); }}
+            title="Meeting Notes"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+            </svg>
+            <span>Notes</span>
           </button>
 
           <button
