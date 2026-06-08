@@ -1076,6 +1076,7 @@ export default function ChatPage() {
                                         </div>
                                         <div className="peer-info">
                                             <span className="peer-name">{u.username || 'Unknown'}</span>
+                                            {u.ip_address && <span className="peer-ip">{u.ip_address}</span>}
                                             <span className="peer-preview">
                                                 {lm ? ((lm.message_type === 'text' || !lm.message_type) ? lm.content?.slice(0, 40) : `📎 ${lm.message_type}`) : (u.is_online ? 'Online' : 'Offline')}
                                             </span>
@@ -1368,12 +1369,16 @@ export default function ChatPage() {
                             <UserAvatar name={displayActivePeerName} size={34} avatarUrl={displayActivePeerAvatar} />
                             <div>
                                 <div className="chat-header-name">{displayActivePeerName}</div>
-                                <div className="chat-header-status">
-                                    {isOnline ? '🟢 Online' : '⚫ Offline'}
+                                {activePeer && peerIpMap[activePeer.device_id] && (
+                                    <div className="chat-header-meta">{peerIpMap[activePeer.device_id]}</div>
+                                )}
+                                <div className="chat-header-status" style={{ color: isOnline ? 'var(--accent)' : 'var(--text-muted)', fontSize: 11 }}>
+                                    {isOnline ? '● Online' : '○ Offline'}
                                 </div>
                             </div>
                         </div>
                         <div className="chat-header-actions">
+                            <span className="e2e-badge">E2E Encrypted</span>
                             <button className="icon-btn" title="Shared Media" onClick={() => setShowSharedMedia(true)}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />

@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from 'react';
 
 const COLORS = [
-    '#4f46e5', '#7c3aed', '#db2777', '#ea580c',
-    '#0891b2', '#059669', '#d97706', '#dc2626',
-    '#2563eb', '#7e22ce', '#c026d3', '#0d9488',
+    '#1a4731', '#1e3a5f', '#3b2a4a', '#4a2020',
+    '#1a3340', '#2d3a1a', '#3d2a10', '#2a1a3d',
+    '#1f3d2f', '#2a2040', '#3d1f30', '#1a3a3a',
 ];
 
 function hashCode(str) {
@@ -189,7 +189,7 @@ export default function UserAvatar({ name, size = 40, className = '', style = {}
                 fill="#fff"
                 fontSize={fontSize}
                 fontWeight="600"
-                fontFamily="Outfit, sans-serif"
+                fontFamily="Space Grotesk, sans-serif"
             >
                 {initials}
             </text>

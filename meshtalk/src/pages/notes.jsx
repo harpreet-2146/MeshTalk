@@ -1,131 +1,208 @@
-// src/pages/notes.jsx
-// Notes page — DB-backed sticky notes with categories, search, pin, color picker
-
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useNotes } from '../context/AppContext';
 import * as api from '../lib/api';
 
-const COLORS = ['#fef3c7','#fce7f3','#dbeafe','#d1fae5','#ede9fe','#fee2e2','#f3f4f6','#fef9c3'];
+const COLORS = ['#7d9a72', '#f59e0b', '#60a5fa', '#f472b6', '#a78bfa', '#fb923c'];
 
 export default function NotesPage() {
     const { notes, loading, save, remove, togglePin } = useNotes();
-    const [editing, setEditing] = useState(null);      // note being edited/created
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('all');
-
-    // ── categories extracted from notes ─────
-    const categories = useMemo(() => {
-        const set = new Set(notes.map(n => n.category || '').filter(Boolean));
-        return ['all', ...Array.from(set)];
-    }, [notes]);
+    const [selectedId, setSelectedId] = useState(null);
+    const [editing, setEditing]       = useState(null);
+    const [search, setSearch]         = useState('');
+    const [savedFlash, setSavedFlash] = useState(false);
+    const saveTimer   = useRef(null);
+    const editingRef  = useRef(null);
+    editingRef.current = editing;
 
     const filtered = useMemo(() => {
-        let list = notes;
-        if (selectedCategory !== 'all') list = list.filter(n => (n.category || '') === selectedCategory);
-        if (searchQuery) {
-            const q = searchQuery.toLowerCase();
-            list = list.filter(n => n.title.toLowerCase().includes(q) || n.content?.toLowerCase().includes(q));
-        }
-        return list;
-    }, [notes, selectedCategory, searchQuery]);
+        const q = search.toLowerCase();
+        return [...notes]
+            .filter(n => !q || n.title.toLowerCase().includes(q) || n.content?.toLowerCase().includes(q))
+            .sort((a, b) => {
+                if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+                return new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+            });
+    }, [notes, search]);
 
-    // ── new note ────────────────────────────
-    const startNew = () => setEditing({ id: '', title: '', content: '', color: '#fef3c7', pinned: false, category: '' });
-
-    // ── save note ───────────────────────────
-    const handleSave = useCallback(async () => {
-        if (!editing || !editing.title.trim()) return;
-        const id = editing.id || await api.generateUuid();
+    const persistSave = useCallback(async (data) => {
+        if (!data?.title?.trim()) return;
+        const id = data.id || await api.generateUuid();
         await save({
-            id, title: editing.title.trim(), content: editing.content || '',
-            color: editing.color, pinned: editing.pinned, category: editing.category || '',
-            created_at: editing.created_at || undefined,
+            id,
+            title:    data.title.trim(),
+            content:  data.content  || '',
+            color:    data.color    || COLORS[0],
+            pinned:   data.pinned   || false,
+            category: data.category || '',
+            created_at: data.created_at || undefined,
         });
-        setEditing(null);
-    }, [editing, save]);
+        setEditing(p => p ? { ...p, id } : p);
+        setSelectedId(id);
+        setSavedFlash(true);
+        setTimeout(() => setSavedFlash(false), 1200);
+    }, [save]);
+
+    const scheduleSave = useCallback(() => {
+        clearTimeout(saveTimer.current);
+        saveTimer.current = setTimeout(() => persistSave(editingRef.current), 900);
+    }, [persistSave]);
+
+    const handleField = useCallback((field, value) => {
+        setEditing(p => ({ ...p, [field]: value }));
+        scheduleSave();
+    }, [scheduleSave]);
+
+    const openNote = (note) => {
+        clearTimeout(saveTimer.current);
+        setSelectedId(note.id);
+        setEditing({ ...note });
+    };
+
+    const startNew = () => {
+        clearTimeout(saveTimer.current);
+        const blank = { id: '', title: '', content: '', color: COLORS[0], pinned: false, category: '' };
+        setSelectedId('__new__');
+        setEditing(blank);
+    };
 
     const handleDelete = useCallback(async (id) => {
+        clearTimeout(saveTimer.current);
         await remove(id);
-        if (editing?.id === id) setEditing(null);
-    }, [remove, editing]);
+        if (selectedId === id || selectedId === '__new__') {
+            setSelectedId(null);
+            setEditing(null);
+        }
+    }, [remove, selectedId]);
+
+    const cycleColor = useCallback(() => {
+        if (!editing) return;
+        const idx = COLORS.indexOf(editing.color);
+        handleField('color', COLORS[(idx + 1) % COLORS.length]);
+    }, [editing, handleField]);
+
+    // Auto-open first note on load
+    useEffect(() => {
+        if (!loading && notes.length > 0 && !selectedId) {
+            openNote(notes[0]);
+        }
+    }, [loading]);
+
+    const accentColor = editing?.color || COLORS[0];
 
     return (
-        <div className="notes-page">
-            {/* ── toolbar ──────────────────── */}
-            <div className="notes-toolbar">
-                <h2>Notes</h2>
-                <div className="notes-toolbar-right">
-                    <div className="notes-search">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input placeholder="Search notes…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-                    </div>
-                    <button className="btn-primary" onClick={startNew}>+ New Note</button>
-                </div>
-            </div>
+        <div className="notes-v2">
+            {/* ── Top tab bar ────────────────────────────────── */}
+            <div className="notes-tabbar">
+                <span className="notes-tabbar-label">NOTES</span>
 
-            {/* ── categories ───────────────── */}
-            {categories.length > 1 && (
-                <div className="notes-categories">
-                    {categories.map(c => (
-                        <button key={c} className={`cat-chip ${selectedCategory === c ? 'active' : ''}`} onClick={() => setSelectedCategory(c)}>
-                            {c === 'all' ? 'All' : c}
+                <div className="notes-tabs-scroll">
+                    {filtered.map(note => (
+                        <button
+                            key={note.id}
+                            className={`notes-tab ${selectedId === note.id ? 'active' : ''}`}
+                            style={{ '--tc': note.color || COLORS[0] }}
+                            onClick={() => openNote(note)}>
+                            <span className="notes-tab-dot" />
+                            <span className="notes-tab-name">{note.title || 'Untitled'}</span>
+                            {note.pinned && <span className="notes-tab-pinned">·</span>}
                         </button>
                     ))}
                 </div>
-            )}
 
-            {/* ── notes grid ───────────────── */}
-            <div className="notes-grid">
-                {loading && <div className="empty-state-sm">Loading…</div>}
-                {!loading && filtered.length === 0 && (
-                    <div className="notes-empty">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" strokeWidth="1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                        <p>No notes yet — click <strong>+ New Note</strong> to create one</p>
-                    </div>
-                )}
-                {filtered.map(note => (
-                    <div key={note.id} className="note-card" style={{ background: note.color || '#fef3c7' }} onClick={() => setEditing({ ...note })}>
-                        <div className="note-card-header">
-                            <span className="note-card-title">{note.title}</span>
-                            <div className="note-card-actions">
-                                <button className={`icon-btn-sm ${note.pinned ? 'pinned' : ''}`} title="Pin"
-                                    onClick={e => { e.stopPropagation(); togglePin(note.id); }}>
-                                    📌
-                                </button>
-                                <button className="icon-btn-sm" title="Delete"
-                                    onClick={e => { e.stopPropagation(); handleDelete(note.id); }}>
-                                    🗑️
-                                </button>
-                            </div>
-                        </div>
-                        <p className="note-card-content">{note.content?.slice(0, 120)}{note.content?.length > 120 ? '…' : ''}</p>
-                        <div className="note-card-footer">
-                            {note.category && <span className="note-cat-tag">{note.category}</span>}
-                            <span className="note-date">{new Date(note.updated_at).toLocaleDateString()}</span>
-                        </div>
-                    </div>
-                ))}
+                <div className="notes-tabbar-actions">
+                    <input
+                        className="notes-search-mini"
+                        placeholder="search…"
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                    />
+                    <button className="notes-new-btn" onClick={startNew} title="New note">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        New
+                    </button>
+                </div>
             </div>
 
-            {/* ── editor modal ─────────────── */}
-            {editing && (
-                <div className="modal-overlay" onClick={() => setEditing(null)}>
-                    <div className="note-editor-modal" onClick={e => e.stopPropagation()}>
-                        <input className="note-editor-title" placeholder="Note title…" value={editing.title}
-                            onChange={e => setEditing(p => ({ ...p, title: e.target.value }))} autoFocus />
-                        <textarea className="note-editor-content" placeholder="Write something…" value={editing.content}
-                            onChange={e => setEditing(p => ({ ...p, content: e.target.value }))} rows={10} />
-                        <input className="note-editor-category" placeholder="Category (optional)" value={editing.category || ''}
-                            onChange={e => setEditing(p => ({ ...p, category: e.target.value }))} />
-                        <div className="note-color-row">
-                            {COLORS.map(c => (
-                                <button key={c} className={`color-dot ${editing.color === c ? 'active' : ''}`}
-                                    style={{ background: c }} onClick={() => setEditing(p => ({ ...p, color: c }))} />
-                            ))}
-                        </div>
-                        <div className="modal-actions">
-                            <button className="btn-secondary" onClick={() => setEditing(null)}>Cancel</button>
-                            <button className="btn-primary" onClick={handleSave} disabled={!editing.title.trim()}>Save</button>
+            {/* ── Editor / Empty ──────────────────────────────── */}
+            {!editing ? (
+                <div className="notes-empty-v2">
+                    <span className="notes-empty-blink">_</span>
+                    <p>no note selected</p>
+                    <button className="btn-primary btn-sm" onClick={startNew}>+ New note</button>
+                </div>
+            ) : (
+                <div className="notes-editor-v2">
+                    {/* Title row */}
+                    <div className="notes-title-row">
+                        <div
+                            className="notes-color-pip"
+                            style={{ background: accentColor }}
+                            onClick={cycleColor}
+                            title="Cycle color"
+                        />
+                        <input
+                            className="notes-title-field"
+                            placeholder="Note title…"
+                            value={editing.title}
+                            onChange={e => handleField('title', e.target.value)}
+                            autoFocus
+                            spellCheck={false}
+                        />
+                        <button
+                            className={`notes-pin-btn ${editing.pinned ? 'active' : ''}`}
+                            onClick={() => handleField('pinned', !editing.pinned)}
+                            title={editing.pinned ? 'Unpin' : 'Pin'}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill={editing.pinned ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                                <path d="M12 2a3 3 0 0 1 3 3v6l3 3v1H6v-1l3-3V5a3 3 0 0 1 3-3z"/>
+                                <line x1="12" y1="22" x2="12" y2="17"/>
+                            </svg>
+                        </button>
+                        {editing.id && (
+                            <button
+                                className="notes-del-btn"
+                                onClick={() => handleDelete(editing.id)}
+                                title="Delete note">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6l-1 14H6L5 6"/>
+                                    <path d="M10 11v6M14 11v6"/>
+                                </svg>
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Color accent line under title */}
+                    <div className="notes-accent-line" style={{ background: accentColor }} />
+
+                    {/* Content */}
+                    <textarea
+                        className="notes-body"
+                        placeholder="Start writing…"
+                        value={editing.content || ''}
+                        onChange={e => handleField('content', e.target.value)}
+                        spellCheck={false}
+                    />
+
+                    {/* Meta bar */}
+                    <div className="notes-metabar">
+                        <input
+                            className="notes-tag-input"
+                            placeholder="tag…"
+                            value={editing.category || ''}
+                            onChange={e => handleField('category', e.target.value)}
+                        />
+                        <div className="notes-metabar-right">
+                            {savedFlash && <span className="notes-saved-flash">saved</span>}
+                            {editing.updated_at && (
+                                <span className="notes-meta-date">
+                                    {new Date(editing.updated_at).toLocaleString(undefined, {
+                                        month: 'short', day: 'numeric',
+                                        hour: '2-digit', minute: '2-digit',
+                                    })}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
