@@ -1,43 +1,50 @@
 /* ================================================================
    MESHTALK — Premium dark system
    Space Grotesk (UI) + Space Mono (technical/meta)
-   Accent: #7d9a72 sage. Base: #0d0f0b warm olive-black.
+   Sage #7d9a72 (accents/active) + Copper #c8864a (icons/labels/decorative)
+   Base: #0d0f0b warm olive-black.
    ================================================================ */
 
 /* ── Variables ──────────────────────────────────────────────── */
 :root {
   --bg:            #0d0f0b;
   --bg-secondary:  #101208;
-  --surface:       #131510;
-  --surface-2:     #191c16;
-  --border:        #1f2219;
-  --border-light:  #282d20;
+  --surface:       #141611;
+  --surface-2:     #1b1e17;
+  --border:        #252a20;
+  --border-light:  #303829;
 
-  --text:          #e2e6dc;
-  --text-secondary:#8a9082;
-  --text-muted:    #44493e;
+  /* Text — brighter, warmer, proper hierarchy */
+  --text:          #f2ede6;
+  --text-secondary:#b8b0a4;
+  --text-muted:    #706860;
 
+  /* Sage — interactive accents, active states, buttons */
   --accent:        #7d9a72;
-  --accent-dim:    rgba(125,154,114,0.12);
-  --accent-glow:   rgba(125,154,114,0.22);
+  --accent-dim:    rgba(125,154,114,0.13);
+  --accent-glow:   rgba(125,154,114,0.25);
 
-  --danger:        #ef4444;
-  --danger-dim:    rgba(239,68,68,0.12);
-  --warning:       #f59e0b;
-  --success:       #22c55e;
+  /* Copper — icons, eyebrow labels, decorative text, logo mark */
+  --copper:        #c8864a;
+  --copper-dim:    rgba(200,134,74,0.12);
+
+  --danger:        #e05252;
+  --danger-dim:    rgba(224,82,82,0.12);
+  --warning:       #d4943a;
+  --success:       #5a9e6f;
 
   --mono: 'Space Mono', 'Courier New', monospace;
 
   --radius-sm: 4px;
   --radius:    6px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
+  --radius-md: 9px;
+  --radius-lg: 12px;
 
   --transition: 150ms ease;
-  --transition-panel: 200ms ease;
+  --transition-panel: 220ms ease;
 
-  --shadow: 0 4px 20px rgba(0,0,0,0.7);
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
+  --shadow: 0 6px 28px rgba(0,0,0,0.7);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.5);
 }
 
 /* ── Reset ──────────────────────────────────────────────────── */
@@ -47,13 +54,13 @@ html, body, #root { width: 100%; height: 100%; overflow: hidden; }
 
 body {
   font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 400;
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
+  line-height: 1.55;
   user-select: none;
 }
 
@@ -162,8 +169,8 @@ input, textarea { user-select: text; }
   display: flex;
   align-items: center;
   gap: 5px;
-  color: var(--accent);
-  opacity: 0.75;
+  color: var(--copper);
+  opacity: 0.85;
 }
 
 .status-bar-center {
@@ -180,22 +187,22 @@ input, textarea { user-select: text; }
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--copper);
   flex-shrink: 0;
 }
 
 .status-bar-sep { opacity: 0.4; }
 
 /* ================================================================
-   ASIDE — 56px control panel strip
+   ASIDE — 72px control panel strip
    ================================================================ */
 .aside {
-  width: 56px;
+  width: 72px;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 0;
+  padding: 14px 0;
   background: var(--bg);
   border-right: 1px solid var(--border);
   flex-shrink: 0;
@@ -203,45 +210,45 @@ input, textarea { user-select: text; }
 }
 
 .aside-logo {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   flex-shrink: 0;
 }
 
 .aside-logo-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: var(--accent);
-  opacity: 0.9;
+  background: var(--copper);
+  opacity: 1;
 }
 
 @keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 8px var(--accent), 0 0 20px var(--accent-glow); opacity: 1; }
-  50%       { box-shadow: 0 0 18px var(--accent), 0 0 40px var(--accent-glow); opacity: 0.7; }
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
 }
 
 .aside_settings {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
   flex: 1;
 }
 
 .aside_settings a,
 .aside_settings button {
-  width: 44px;
-  min-height: 44px;
+  width: 58px;
+  min-height: 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 5px;
   border-radius: var(--radius-md);
   color: var(--text-muted);
   background: transparent;
@@ -250,16 +257,16 @@ input, textarea { user-select: text; }
   transition: color var(--transition), background var(--transition);
   position: relative;
   text-decoration: none;
-  padding: 6px 0;
+  padding: 8px 0;
 }
 
 .aside_settings a .aside-label,
 .aside_settings button .aside-label {
-  font-size: 8px;
+  font-size: 10px;
   font-family: var(--mono);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   line-height: 1;
   transition: color var(--transition);
   display: block;
@@ -267,15 +274,15 @@ input, textarea { user-select: text; }
 
 .aside_settings a:hover,
 .aside_settings button:hover {
-  color: var(--text);
+  color: var(--text-secondary);
   background: var(--surface);
 }
 
 .aside_settings a.active {
-  color: var(--accent);
-  background: var(--accent-dim);
+  color: var(--copper);
+  background: var(--copper-dim);
 }
-.aside_settings a.active .aside-label { color: var(--accent); }
+.aside_settings a.active .aside-label { color: var(--copper); }
 
 .aside-badge {
   position: absolute;
@@ -464,12 +471,12 @@ input, textarea { user-select: text; }
 }
 
 .welcome-eyebrow {
-  font-size: 10px;
+  font-size: 11px;
   font-family: var(--mono);
   font-weight: 700;
-  letter-spacing: 0.2em;
-  color: var(--accent);
-  opacity: 0.6;
+  letter-spacing: 0.22em;
+  color: var(--copper);
+  opacity: 0.85;
   text-transform: uppercase;
   animation: fadeSlideUp 0.5s ease 0.1s both;
 }
@@ -477,20 +484,20 @@ input, textarea { user-select: text; }
 .welcome-logo {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   animation: fadeSlideUp 0.5s ease 0.25s both;
 }
 
 .welcome-logo-dot {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--copper);
   flex-shrink: 0;
 }
 
 .welcome-wordmark {
-  font-size: 56px;
+  font-size: 62px;
   font-weight: 800;
   color: var(--text);
   letter-spacing: -0.03em;
@@ -498,10 +505,10 @@ input, textarea { user-select: text; }
 }
 
 .welcome-tagline {
-  font-size: 15px;
+  font-size: 16px;
   font-family: var(--mono);
   color: var(--text-secondary);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   animation: fadeSlideUp 0.5s ease 0.4s both;
 }
 
@@ -534,8 +541,8 @@ input, textarea { user-select: text; }
 .welcome-features li:nth-child(4) { animation-delay: 1.0s; }
 
 .wf-caret {
-  color: var(--accent);
-  font-size: 18px;
+  color: var(--copper);
+  font-size: 20px;
   line-height: 1;
   flex-shrink: 0;
   font-weight: 700;
@@ -617,12 +624,12 @@ input, textarea { user-select: text; }
 }
 
 .setup-card-label {
-  font-size: 9px;
+  font-size: 11px;
   font-family: var(--mono);
   font-weight: 700;
   letter-spacing: 0.2em;
-  color: var(--accent);
-  opacity: 0.6;
+  color: var(--copper);
+  opacity: 0.9;
   text-transform: uppercase;
   margin-bottom: 16px;
 }
@@ -707,9 +714,10 @@ input, textarea { user-select: text; }
 }
 
 .chat-sidebar-header h2 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text);
+  letter-spacing: -0.01em;
 }
 
 .chat-sidebar-actions { display: flex; gap: 2px; }
@@ -2815,37 +2823,38 @@ input, textarea { user-select: text; }
 }
 
 .nw-header-eyebrow {
-  font-size: 9px;
+  font-size: 11px;
   font-family: var(--mono);
   font-weight: 700;
   letter-spacing: 0.22em;
-  color: var(--accent);
-  opacity: 0.7;
+  color: var(--copper);
+  opacity: 0.9;
   text-transform: uppercase;
 }
 
 .nw-header-title {
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 30px;
+  font-weight: 800;
   color: var(--text);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   line-height: 1.1;
 }
 
 .nw-header-sub {
-  font-size: 13px;
-  color: var(--text-muted);
+  font-size: 14px;
+  color: var(--text-secondary);
   font-family: var(--mono);
   letter-spacing: 0.02em;
-  max-width: 540px;
+  max-width: 560px;
 }
 
 .nw-section-label {
-  font-size: 9px;
+  font-size: 11px;
   font-family: var(--mono);
   font-weight: 700;
-  letter-spacing: 0.2em;
-  color: var(--text-muted);
+  letter-spacing: 0.18em;
+  color: var(--copper);
+  opacity: 0.75;
   text-transform: uppercase;
   margin-bottom: 14px;
 }
@@ -2929,15 +2938,15 @@ input, textarea { user-select: text; }
 
 .nw-concept-header { display: flex; align-items: flex-start; gap: 12px; }
 
-.nw-concept-icon { color: var(--accent); opacity: 0.8; flex-shrink: 0; margin-top: 2px; }
+.nw-concept-icon { color: var(--copper); opacity: 0.85; flex-shrink: 0; margin-top: 2px; }
 
 .nw-concept-tag {
-  font-size: 8px;
+  font-size: 10px;
   font-family: var(--mono);
   font-weight: 700;
-  letter-spacing: 0.2em;
-  color: var(--accent);
-  opacity: 0.65;
+  letter-spacing: 0.18em;
+  color: var(--copper);
+  opacity: 0.8;
   text-transform: uppercase;
   margin-bottom: 3px;
 }
